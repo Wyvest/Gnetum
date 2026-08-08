@@ -163,7 +163,6 @@ publishMods {
             minecraftVersions.add(prop("deps.minecraft"))
         }
         requires {
-            id = "P7dR8mSH"
             slug = "fabric-api"
         }
     }
