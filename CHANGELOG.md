@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.5.3
+
+- Fixed "Resource reload failed" error during launch
+
 ## 4.5.2
 
 - Caching for "Unknown Elements" is now disabled by default to prevent rendering issues
