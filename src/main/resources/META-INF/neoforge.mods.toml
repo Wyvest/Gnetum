@@ -9,7 +9,10 @@ displayName = "${mod_name}"
 version = "${mod_version_full}"
 displayURL = "${mod_link}"
 modUrl = "${mod_link}"
+# NeoForge uses iconFile and bannerFile as of 26.2.0.50-beta; we keep the original logoFile for backwards compatibility
 logoFile = "assets/gnetum/gnetum.png"
+iconFile = "assets/gnetum/gnetum.png"
+bannerFile = "assets/gnetum/gnetum.png"
 authors = "${mod_authors}"
 credits = "AlanChrisa"
 logoBlur = false
