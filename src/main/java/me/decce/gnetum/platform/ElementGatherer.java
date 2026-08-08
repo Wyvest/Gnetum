@@ -34,10 +34,10 @@ public abstract class ElementGatherer {
 		}
 
 		//? >=1.21.10 {
+		newMap.get(Constants.UNKNOWN_ELEMENTS).enabled.defaultValue = false;
 		newMap.get(Constants.DEBUG_OVERLAY).enabled.defaultValue = false;
 		//? }
 		newMap.get(Constants.HAND_ELEMENT).enabled.defaultValue = false;
-		newMap.get(Constants.UNKNOWN_ELEMENTS).enabled.defaultValue = false;
 
 		Gnetum.config.map = newMap;
 	}
