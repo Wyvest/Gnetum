@@ -133,8 +133,8 @@ publishMods {
     modLoaders.add(prop("deps.platform"))
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        clientRequired = true
-        serverRequired = false
+        client = true
+        server = false
         projectId = "1220460"
         projectSlug = "gnetum"
         if (hasProperty("minecraft_supported_from")) {
@@ -152,6 +152,7 @@ publishMods {
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = "7MoE34WK"
+        environment = CLIENT_ONLY
         if (hasProperty("minecraft_supported_from")) {
             minecraftVersionRange {
                 start = prop("minecraft_supported_from")
