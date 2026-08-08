@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.5.2
+
+- Caching for "Unknown Elements" is now disabled by default to prevent rendering issues
+  - These elements are rendered at arbitrary points, and there is no way for Gnetum to cache them reliably without causing issues. For example, some mods mixin into specific methods to render their HUDs. Mods that use this approach are encouraged to switch to the appropriate APIs (`HudElementRegistry` from Fabric API, and `RegisterGuiLayersEvent`/`RenderGuiEvent`/`RenderGuiLayerEvent` on NeoForge) instead.
+- Added support for the new NeoForge mods list screen
+
 ## 4.5.1
 
 - Fixed a crash when opening config screen with specific mods
