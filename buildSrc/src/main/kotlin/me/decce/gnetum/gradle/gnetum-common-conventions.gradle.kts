@@ -146,7 +146,9 @@ publishMods {
         else {
             minecraftVersions.add(prop("deps.minecraft"))
         }
-        requires("fabric-api")
+        if (prop("deps.platform") == "fabric") {
+            requires("fabric-api")
+        }
     }
 
     modrinth {
@@ -162,8 +164,10 @@ publishMods {
         else {
             minecraftVersions.add(prop("deps.minecraft"))
         }
-        requires {
-            slug = "fabric-api"
+        if (prop("deps.platform") == "fabric") {
+            requires {
+                slug = "fabric-api"
+            }
         }
     }
 }
