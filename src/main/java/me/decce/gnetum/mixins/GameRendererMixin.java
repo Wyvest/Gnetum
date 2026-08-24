@@ -119,6 +119,9 @@ public class GameRendererMixin {
 			return;
 		}
 
+		//? <=1.21.1
+		//gnetum$checkForScreenCatchUp();
+
 		SharedValues.guiGraphics = guiGraphics;
 		SharedValues.deltaTracker = deltaTracker;
 
