@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 //? <=1.21.4 {
 /*import me.decce.gnetum.CachedElement;
 import me.decce.gnetum.compat.xaerominimap.XaeroMinimapCompat;
+import me.decce.gnetum.versioned.HudHandler;
 import me.decce.gnetum.hud.HudManager;
 import me.decce.gnetum.hud.SharedValues;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -119,20 +120,22 @@ public class GameRendererMixin {
 			return;
 		}
 
-		//? <=1.21.1
-		//gnetum$checkForScreenCatchUp();
+		gnetum$checkForScreenCatchUp();
+		boolean catchup = Gnetum.framebuffers().needsCatchUp();
 
 		SharedValues.guiGraphics = guiGraphics;
 		SharedValues.deltaTracker = deltaTracker;
 
 		guiGraphics.pose().pushPose();
 
-		ImmediatelyFastCompat.batchIfInstalled(guiGraphics, () -> {
-			JourneyMapCompat.invokeRenderWaypointDecos(guiGraphics);
-			XaeroMinimapCompat.tryRenderWaypoint(guiGraphics, deltaTracker);
-			gnetum$renderVanillaHuds(CachedElement::shouldRenderAsUncached);
-			gnetum$renderFabricHuds(guiGraphics, deltaTracker);
-		});
+		if (!catchup) {
+			ImmediatelyFastCompat.batchIfInstalled(guiGraphics, () -> {
+				JourneyMapCompat.invokeRenderWaypointDecos(guiGraphics);
+				XaeroMinimapCompat.tryRenderWaypoint(guiGraphics, deltaTracker);
+				gnetum$renderVanillaHuds(CachedElement::shouldRenderAsUncached);
+				gnetum$renderFabricHuds(guiGraphics, deltaTracker, CachedElement::shouldRenderAsUncached);
+			});
+		}
 
 		Gnetum.framebuffers().resize();
 		if (Gnetum.pass == 0) {
@@ -148,7 +151,7 @@ public class GameRendererMixin {
 		ImmediatelyFastCompat.batchIfInstalled(guiGraphics, () -> {
 			gnetum$renderGuiInjection(instance, guiGraphics, deltaTracker);
 			gnetum$renderVanillaHuds(CachedElement::shouldRenderAsCached);
-			gnetum$renderFabricHuds(guiGraphics, deltaTracker);
+			gnetum$renderFabricHuds(guiGraphics, deltaTracker, CachedElement::shouldRenderAsCached);
 		});
 
 		VersionCompatUtil.profilerPop();
@@ -158,7 +161,7 @@ public class GameRendererMixin {
 		Gnetum.nextPass();
 		Gnetum.framebuffers().unbind();
 
-		if (Gnetum.framebuffers().needsCatchUp()) {
+		if (catchup) {
 			original.call(instance, guiGraphics, deltaTracker);
 		}
 		else {
@@ -207,8 +210,15 @@ public class GameRendererMixin {
 	}
 
 	@Unique
-	private void gnetum$renderFabricHuds(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-		HudRenderCallback.EVENT.invoker().onHudRender(guiGraphics, deltaTracker);
+	private void gnetum$renderFabricHuds(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Predicate<CachedElement> check) {
+		for (var callback : HudHandler.callbacks) {
+			var element = Gnetum.getElement(callback.name());
+			if (check.test(element)) {
+				element.begin();
+				callback.callback().onHudRender(guiGraphics, deltaTracker);
+				element.end();
+			}
+		}
 	}
 	*///? }
 
