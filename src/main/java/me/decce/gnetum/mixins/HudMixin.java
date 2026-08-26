@@ -2,6 +2,7 @@ package me.decce.gnetum.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,6 +12,7 @@ import me.decce.gnetum.VersionCompatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,6 +46,9 @@ import me.decce.gnetum.hud.SharedValues;
 import me.decce.gnetum.compat.xaerominimap.XaeroMinimapCompat;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //? }
+//? neoforge {
+/*import net.neoforged.neoforge.client.gui.GuiLayerManager;
+*///? }
 
 //? >=26.2 {
 /*@Mixin(value = Hud.class, priority = 5000)
@@ -51,13 +56,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Gui.class, priority = 5000)
 //? }
 public class HudMixin {
+	//? neoforge {
+	/*@Shadow
+	public int leftHeight;
+	@Shadow
+	public int rightHeight;
+	@Unique
+	private int gnetum$lastLeftHeight = 39;
+	@Unique
+	private int gnetum$lastRightHeight = 39;
+	@Unique
+	private int gnetum$currentLeftHeight;
+	@Unique
+	private int gnetum$currentRightHeight;
+	*///? }
+
+
     //? if >=1.21.10 || <=1.20.4 {
 	//? if >26 {
 	/*@WrapMethod(method = "extractRenderState")
 	*///? } else {
 	@WrapMethod(method = "render")
 	//? }
-	private void gnetum$wrapGuiRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
+	private void gnetum$wrapHudRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, Operation<Void> original) {
 		if (!Gnetum.config.isEnabled()) {
 			original.call(guiGraphics, deltaTracker);
 			return;
@@ -90,6 +111,9 @@ public class HudMixin {
 		gnetum$renderFabricHuds(guiGraphics, deltaTracker);
 		*///? }
 
+		//? neoforge {
+
+		//? }
 
 		if (Gnetum.pass > 0) {
 			VersionCompatUtil.flush(guiGraphics);
@@ -119,6 +143,44 @@ public class HudMixin {
 		/*SharedValues.guiGraphics = null;
 		*///? }
 	}
+
+	//? neoforge {
+	/*//? if >26 {
+	/^@WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/gui/GuiLayerManager;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
+	^///? } else {
+	@WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/gui/GuiLayerManager;render(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V"))
+	//? }
+	private void gnetum$wrapInnerHudRender(GuiLayerManager instance, GuiGraphics guiGraphics, DeltaTracker partialTick, Operation<Void> original) {
+		if (!Gnetum.rendering) {
+			original.call(instance, guiGraphics, partialTick);
+			return;
+		}
+		if (Gnetum.pass == 1) {
+			gnetum$currentLeftHeight = 39;
+			gnetum$currentRightHeight = 39;
+		}
+		else if (Gnetum.pass > 1) {
+			leftHeight = gnetum$currentLeftHeight;
+			rightHeight = gnetum$currentRightHeight;
+		}
+
+		original.call(instance, guiGraphics, partialTick);
+
+		if (Gnetum.pass > 0) {
+			gnetum$currentLeftHeight = leftHeight;
+			gnetum$currentRightHeight = rightHeight;
+		}
+		if (Gnetum.pass != Gnetum.config.getNumberOfPasses()) {
+			leftHeight = gnetum$lastLeftHeight;
+			rightHeight = gnetum$lastRightHeight;
+		}
+		else {
+			gnetum$lastLeftHeight = leftHeight;
+			gnetum$lastRightHeight = rightHeight;
+		}
+	}
+	*///? }
+
 	//? } else >=1.21.1 {
     /*@SuppressWarnings({"MixinAnnotationTarget", "InvalidInjectorMethodSignature"})
     @WrapWithCondition(method = "render", at = @At(value = "INVOKE", target = "Lnet/fabricmc/fabric/api/client/rendering/v1/HudRenderCallback;onHudRender(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", remap = false), require = 0, expect = 0)
