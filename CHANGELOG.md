@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.5.4
+
+- Fixed HUD flickering when opening chat screen on 1.21.1
+- Fixed duplicate modded HUD rendering on 1.21.1
+- Fixed armor bar / air bar height on NeoForge
+
 ## 4.5.3
 
 - Fixed "Resource reload failed" error during launch
